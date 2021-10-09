@@ -34,10 +34,12 @@ export class ScreenSvc {
       await Promise.all(
         Object.keys(selectorInnerHtml).map(async (selector) => {
           const el = await page?.$(selector)
-          el &&
-            (await el.evaluate((e, { innerHTML }) => (e.innerHTML = innerHTML), {
-              innerHTML: selectorInnerHtml[selector]
-            }))
+          if (!el) {
+            return
+          }
+          await el.evaluate((e, { innerHTML }) => (e.innerHTML = innerHTML), {
+            innerHTML: selectorInnerHtml[selector]
+          })
         })
       )
 
