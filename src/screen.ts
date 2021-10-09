@@ -31,7 +31,7 @@ export class ScreenSvc {
       }
       const { pwrt, page } = await this.getPwrt(url)
 
-      for (const selector in selectorInnerHtml) {
+      for (const selector in Object.keys(selectorInnerHtml)) {
         const el = await page?.$(selector)
         if (!el) {
           continue
@@ -40,9 +40,9 @@ export class ScreenSvc {
         await el.evaluate((e, { innerHTML }) => (e.innerHTML = innerHTML), { innerHTML: selectorInnerHtml[selector] })
       }
 
-      const el = await page?.$('.tgme_widget_message_meta')
-      if (el) {
-        await el.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
+      const elMeta = await page?.$('.tgme_widget_message_meta')
+      if (elMeta) {
+        await elMeta.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
       }
 
       const { result } = await this.getScreen(url, page!)
@@ -88,8 +88,9 @@ export class ScreenSvc {
       await page?.goto(url)
 
       return { pwrt, page }
-    } catch {}
-    return {}
+    } catch (error) {
+      return { error }
+    }
   }
 
   private async applyBlackList(page: Page) {
