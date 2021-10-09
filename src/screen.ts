@@ -31,14 +31,15 @@ export class ScreenSvc {
       }
       const { pwrt, page } = await this.getPwrt(url)
 
-      for (const selector in Object.keys(selectorInnerHtml)) {
-        const el = await page?.$(selector)
-        if (!el) {
-          continue
-        }
-
-        await el.evaluate((e, { innerHTML }) => (e.innerHTML = innerHTML), { innerHTML: selectorInnerHtml[selector] })
-      }
+      await Promise.all(
+        Object.keys(selectorInnerHtml).map(async (selector) => {
+          const el = await page?.$(selector)
+          el &&
+            (await el.evaluate((e, { innerHTML }) => (e.innerHTML = innerHTML), {
+              innerHTML: selectorInnerHtml[selector]
+            }))
+        })
+      )
 
       const elMeta = await page?.$('.tgme_widget_message_meta')
       if (elMeta) {
