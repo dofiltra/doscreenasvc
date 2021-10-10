@@ -19,7 +19,7 @@ export class TelegramScreen extends ScreenSvc {
           }
 
           return await el?.evaluate(
-            (e: any, { channelUrl }) => {
+            (e: any, { chanUrl }) => {
               const [, postId] = (e.attributes['data-post']?.value || '').split('/')
               const userPhoto = e.querySelector('.tgme_widget_message_user_photo img')?.src
               const ownerName = e.querySelector('.tgme_widget_message_owner_name')?.innerText
@@ -33,7 +33,7 @@ export class TelegramScreen extends ScreenSvc {
               const date = dateEl.attributes?.datetime?.value
 
               return {
-                url: `${channelUrl}/${postId}`,
+                url: `${chanUrl}/${postId}`,
                 postId,
                 userPhoto,
                 ownerName,
@@ -47,7 +47,7 @@ export class TelegramScreen extends ScreenSvc {
                 }
               }
             },
-            { channelUrl }
+            { chanUrl: channelUrl }
           )
         })
       )
