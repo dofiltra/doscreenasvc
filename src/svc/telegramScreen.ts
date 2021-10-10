@@ -77,6 +77,7 @@ export class TelegramScreen extends ScreenSvc {
         { host: new URL(url).host }
       )
 
+      await this.replaceNotSupport(page)
       await this.removeEls(page!, ['.tgme_widget_message_forwarded_from', '.message_media_not_supported_wrap'])
     }
 
@@ -99,5 +100,15 @@ export class TelegramScreen extends ScreenSvc {
     } catch {
       return super.fixUrl(url)
     }
+  }
+
+  private async replaceNotSupport(page: Page) {
+    const elNotSupport = await page?.$('.message_media_not_supported_wrap')
+    if (!elNotSupport) {
+      return
+    }
+
+    // TODO 
+
   }
 }

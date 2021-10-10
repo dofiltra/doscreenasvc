@@ -1,4 +1,4 @@
-import { BrowserManager, devices, Page, chromium, ElementHandle } from 'browser-manager'
+import { BrowserManager, devices, Page, chromium, ElementHandle, firefox, webkit, BrowserType } from 'browser-manager'
 
 type TScreenOpts = {
   url: string
@@ -13,6 +13,9 @@ export type TScreenSettings = {
 
   selectorInnerHtml?: { [key: string]: string }
   selectorsRemove?: string[]
+
+  browserType?: BrowserType<any>
+  device?: any
 }
 
 export class ScreenSvc {
@@ -30,6 +33,8 @@ export class ScreenSvc {
       }
       const { pwrt, page } = { ...(await this.getPwrt(url)) }
       const { result } = await this.getScreen(url, page!)
+
+      // await sleep(600e3)
       await pwrt?.close()
 
       return { result }
@@ -58,15 +63,17 @@ export class ScreenSvc {
       headless = true,
       selectorInnerHtml = {},
       selectorsRemove = [],
-      blackListUrls
+      blackListUrls,
+      browserType = chromium,
+      device = devices['iPhone 12 Pro Max']
     } = this.settings
     try {
       const pwrt: BrowserManager | null = await BrowserManager.build({
-        browserType: chromium,
+        browserType,
         launchOpts: {
           headless
         },
-        device: devices['Pixel 5'],
+        device,
         idleCloseSeconds: 60,
         maxOpenedBrowsers,
         appPath: rootPath
