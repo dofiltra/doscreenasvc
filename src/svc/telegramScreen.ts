@@ -26,8 +26,12 @@ export class TelegramScreen extends ScreenSvc {
               const postBody = e.querySelector('.tgme_widget_message_text')?.innerHTML
               const views = e.querySelector('.tgme_widget_message_views')?.innerText
               const author = e.querySelector('.tgme_widget_message_from_author')?.innerText
-              const fwdHref = e.querySelector('.tgme_widget_message_forwarded_from_name')?.href
-              const fwdText = e.querySelector('.tgme_widget_message_forwarded_from_name')?.innerText
+
+              const $fwd = e.querySelector('.tgme_widget_message_forwarded_from_name')
+              const fwd = $fwd && {
+                href: $fwd.href,
+                name: $fwd.innerText
+              }
 
               const dateEl = e.querySelector('.tgme_widget_message_date time')
               const date = dateEl.attributes?.datetime?.value
@@ -44,10 +48,7 @@ export class TelegramScreen extends ScreenSvc {
                 views,
                 author,
                 date,
-                fwd: {
-                  href: fwdHref,
-                  name: fwdText
-                }
+                fwd
               }
             },
             { chanUrl: channelUrl }
@@ -56,7 +57,7 @@ export class TelegramScreen extends ScreenSvc {
       )
     )
       .filter((x) => x?.postId)
-      .reverse()
+      .sort((a, b) => b?.postId - a?.postId)
 
     await pwrt?.close()
 
