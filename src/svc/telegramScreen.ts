@@ -91,7 +91,6 @@ export class TelegramScreen extends ScreenSvc {
     return super.getScreenEl(url, page)
   }
 
-
   protected fixUrl(url: string) {
     try {
       const u = new URL(url)
