@@ -19,7 +19,7 @@ class App {
       headless: false,
       maxOpenedBrowsers: 1,
       rootPath: App.rootPath
-    }).fromUrl({ url: 'https://t.me/turkeymuslim/2907' })
+    }).get({ url: 'https://t.me/turkeymuslim/2907' })
   }
 }
 

@@ -10,12 +10,12 @@
     "build": "tsc",
     "format": "prettier --write \"src/**/*.ts\"",
     "lint": "tslint -p tsconfig.json",
-    "prepublishOnly": "npm test && npm run lint",
-    "prepare": "npm run build",
-    "preversion": "npm run lint",
-    "version": "npm run format && git add -A src",
+    "prepublishOnly": "yarn test && yarn run lint",
+    "prepare": "yarn run build",
+    "preversion": "yarn run lint",
+    "version": "yarn run format && git add -A src",
     "postversion": "git push && git push --tags",
-    "dev": "npm run build && node --trace-warnings --experimental-modules --es-module-specifier-resolution=node ./lib/debug.js"
+    "dev": "yarn run build && node --trace-warnings --experimental-modules --es-module-specifier-resolution=node ./lib/debug.js"
   },
   "repository": {
     "type": "git",

@@ -1,19 +1,16 @@
 import { BrowserManager, devices, Page, chromium } from 'browser-manager'
 
-type TScreenFromUrlOpts = {
+type TScreenOpts = {
   url: string
-}
-
-export type TScreenFromPageOpts = {
-  url: string
-  selectorInnerHtml: { [key: string]: string }
-  selectorsRemove?: string[]
 }
 
 export type TScreenSettings = {
   maxOpenedBrowsers?: number
   rootPath?: string
   headless?: boolean
+
+  selectorInnerHtml?: { [key: string]: string }
+  selectorsRemove?: string[]
 }
 
 export class ScreenSvc {
@@ -23,14 +20,57 @@ export class ScreenSvc {
     this.settings = s
   }
 
-  async fromPage(opts: TScreenFromPageOpts) {
+  async get(opts: TScreenOpts) {
     try {
-      const { url: urlOrig, selectorInnerHtml, selectorsRemove = [] } = opts
-      const url = this.fixUrl(urlOrig)
+      const url = this.fixUrl(opts.url)
       if (!url?.length) {
         return { error: 'invalid url' }
       }
-      const { pwrt, page } = await this.getPwrt(url)
+      const { pwrt, page } = { ...(await this.getPwrt(url)) }
+      const { result } = await this.getScreen(url, page!)
+      await pwrt?.close()
+
+      return { result }
+    } catch (error) {
+      return { error }
+    }
+  }
+
+  private async removeEls(page: Page, selectorsRemove: string[]) {
+    if (!page || !selectorsRemove?.length) {
+      return
+    }
+
+    await Promise.all(
+      selectorsRemove.map(async (selector) => {
+        const rmEl = await page?.$(selector)
+        await rmEl?.evaluate((e) => e.remove())
+      })
+    )
+  }
+
+  private async getPwrt(url: string) {
+    const {
+      rootPath,
+      maxOpenedBrowsers = 1,
+      headless = true,
+      selectorInnerHtml = {},
+      selectorsRemove = []
+    } = this.settings
+    try {
+      const pwrt: BrowserManager | null = await BrowserManager.build({
+        browserType: chromium,
+        launchOpts: {
+          headless
+        },
+        device: devices['Pixel 5'],
+        idleCloseSeconds: 60,
+        maxOpenedBrowsers,
+        appPath: rootPath
+      })
+      const page = await pwrt?.newPage({})
+      await this.applyBlackList(page!)
+      await page?.goto(url, { waitUntil: 'domcontentloaded' })
 
       await Promise.all(
         Object.keys(selectorInnerHtml).map(async (selector) => {
@@ -64,61 +104,6 @@ export class ScreenSvc {
         },
         { host: new URL(url).host }
       )
-
-      const { result } = await this.getScreen(url, page!)
-      await pwrt?.close()
-
-      return { result }
-    } catch (error) {
-      return { error }
-    }
-  }
-
-  async fromUrl(opts: TScreenFromUrlOpts) {
-    try {
-      const url = this.fixUrl(opts.url)
-      if (!url?.length) {
-        return { error: 'invalid url' }
-      }
-      const { pwrt, page } = { ...(await this.getPwrt(url)) }
-      const { result } = await this.getScreen(url, page!)
-      await pwrt?.close()
-
-      return { result }
-    } catch (error) {
-      return { error }
-    }
-  }
-
-  private async removeEls(page: Page, selectorsRemove: string[]) {
-    if (!page || !selectorsRemove?.length) {
-      return
-    }
-
-    await Promise.all(
-      selectorsRemove.map(async (selector) => {
-        const rmEl = await page?.$(selector)
-        await rmEl?.evaluate((e) => e.remove())
-      })
-    )
-  }
-
-  private async getPwrt(url: string) {
-    const { rootPath, maxOpenedBrowsers = 1 } = this.settings
-    try {
-      const pwrt: BrowserManager | null = await BrowserManager.build({
-        browserType: chromium,
-        launchOpts: {
-          headless: !!this.settings.headless
-        },
-        device: devices['Pixel 5'],
-        idleCloseSeconds: 60,
-        maxOpenedBrowsers,
-        appPath: rootPath
-      })
-      const page = await pwrt?.newPage({})
-      await this.applyBlackList(page!)
-      await page?.goto(url)
 
       return { pwrt, page }
     } catch (error) {
