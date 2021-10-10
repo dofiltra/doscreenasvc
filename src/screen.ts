@@ -7,6 +7,7 @@ type TScreenFromUrlOpts = {
 export type TScreenFromPageOpts = {
   url: string
   selectorInnerHtml: { [key: string]: string }
+  selectorsRemove?: string[]
 }
 
 export type TScreenSettings = {
@@ -24,7 +25,7 @@ export class ScreenSvc {
 
   async fromPage(opts: TScreenFromPageOpts) {
     try {
-      const { url: urlOrig, selectorInnerHtml } = opts
+      const { url: urlOrig, selectorInnerHtml, selectorsRemove = [] } = opts
       const url = this.fixUrl(urlOrig)
       if (!url?.length) {
         return { error: 'invalid url' }
@@ -44,14 +45,25 @@ export class ScreenSvc {
       )
 
       const elMeta = await page?.$('.tgme_widget_message_meta')
-      if (elMeta) {
-        await elMeta.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
-      }
+      await elMeta?.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
 
-      const notSupportedEl = await page?.$('.message_media_not_supported_wrap')
-      if (notSupportedEl) {
-        await notSupportedEl.evaluate((e) => e.remove())
-      }
+      selectorsRemove.push(...['.tgme_widget_message_forwarded_from', '.message_media_not_supported_wrap'])
+      await this.removeEls(page!, selectorsRemove)
+
+      const elText = await page?.$('.tgme_widget_message_text')
+      await elText?.evaluate(
+        async (e, { host }) => {
+          const lastChildren = Array.from(e.children || []).slice(-2)
+          await Promise.all(
+            lastChildren.map(async (c) => {
+              if (c.innerHTML?.includes(host)) {
+                c.remove()
+              }
+            })
+          )
+        },
+        { host: new URL(url).host }
+      )
 
       const { result } = await this.getScreen(url, page!)
       await pwrt?.close()
@@ -76,6 +88,19 @@ export class ScreenSvc {
     } catch (error) {
       return { error }
     }
+  }
+
+  private async removeEls(page: Page, selectorsRemove: string[]) {
+    if (!page || !selectorsRemove?.length) {
+      return
+    }
+
+    await Promise.all(
+      selectorsRemove.map(async (selector) => {
+        const rmEl = await page?.$(selector)
+        await rmEl?.evaluate((e) => e.remove())
+      })
+    )
   }
 
   private async getPwrt(url: string) {
