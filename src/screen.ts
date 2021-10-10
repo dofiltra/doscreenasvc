@@ -68,9 +68,13 @@ export class ScreenSvc {
         maxOpenedBrowsers,
         appPath: rootPath
       })
-      const page = await pwrt?.newPage({})
-      await this.applyBlackList(page!)
-      await page?.goto(url, { waitUntil: 'networkidle' })
+      const page = await pwrt?.newPage({
+        url,
+        waitUntil: 'networkidle',
+        blackList: {
+          urls: ['/telegram-widget.js']
+        }
+      })
 
       await Promise.all(
         Object.keys(selectorInnerHtml).map(async (selector) => {
@@ -109,15 +113,6 @@ export class ScreenSvc {
     } catch (error) {
       return { error }
     }
-  }
-
-  private async applyBlackList(page: Page) {
-    const blackListRequestUrls = ['/telegram-widget.js']
-    await page?.route('**/*', (route) => {
-      return blackListRequestUrls.some((bl) => new RegExp(bl).test(route.request().url()))
-        ? route.abort()
-        : route.continue()
-    })
   }
 
   private async getScreen(url: string, page: Page) {
