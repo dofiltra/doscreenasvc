@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 import path from 'path'
-import { webkit } from 'playwright'
+import { chromium } from 'playwright'
 import { fileURLToPath } from 'url'
-import { ScreenSvc, TelegramScreen } from '.'
+import { TelegramScreen } from '.'
 
 type TAppSettings = {}
 
@@ -21,10 +21,8 @@ class App {
       maxOpenedBrowsers: 1,
       rootPath: App.rootPath,
       blackListUrls: ['/telegram-widget.js'],
-      browserType: webkit
+      browserType: chromium
     }).get({ url: 'https://t.me/turkeymuslim/2907' })
-
-    
   }
 }
 

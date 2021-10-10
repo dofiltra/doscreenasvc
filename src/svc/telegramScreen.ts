@@ -109,8 +109,7 @@ export class TelegramScreen extends ScreenSvc {
       return
     }
 
-    await sleep(5e3)
-
-    // TODO
+    const elPrevImage = await page?.$('.tgme_widget_message_video_thumb')
+    await elPrevImage?.evaluate((e) => e?.style && (e.style.filter = 'none'))
   }
 }

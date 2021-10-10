@@ -34,7 +34,6 @@ export class ScreenSvc {
       const { pwrt, page } = { ...(await this.getPwrt(url)) }
       const { result } = await this.getScreen(url, page!)
 
-      // await sleep(600e3)
       await pwrt?.close()
 
       return { result }
