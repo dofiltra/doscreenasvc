@@ -9,6 +9,8 @@ export type TScreenSettings = {
   rootPath?: string
   headless?: boolean
 
+  blackListUrls?: string[]
+
   selectorInnerHtml?: { [key: string]: string }
   selectorsRemove?: string[]
 }
@@ -36,7 +38,7 @@ export class ScreenSvc {
     }
   }
 
-  private async removeEls(page: Page, selectorsRemove: string[]) {
+  protected async removeEls(page: Page, selectorsRemove: string[]) {
     if (!page || !selectorsRemove?.length) {
       return
     }
@@ -49,13 +51,14 @@ export class ScreenSvc {
     )
   }
 
-  private async getPwrt(url: string) {
+  protected async getPwrt(url: string) {
     const {
       rootPath,
       maxOpenedBrowsers = 1,
       headless = true,
       selectorInnerHtml = {},
-      selectorsRemove = []
+      selectorsRemove = [],
+      blackListUrls
     } = this.settings
     try {
       const pwrt: BrowserManager | null = await BrowserManager.build({
@@ -72,7 +75,7 @@ export class ScreenSvc {
         url,
         waitUntil: 'networkidle',
         blackList: {
-          urls: ['/telegram-widget.js']
+          urls: blackListUrls
         }
       })
 
@@ -88,29 +91,10 @@ export class ScreenSvc {
         })
       )
 
-      const elMeta = await page?.$('.tgme_widget_message_meta')
-      await elMeta?.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
-
-      selectorsRemove.push(...['.tgme_widget_message_forwarded_from', '.message_media_not_supported_wrap'])
       await this.removeEls(page!, selectorsRemove)
 
-      const elText = await page?.$('.tgme_widget_message_text')
-      await elText?.evaluate(
-        async (e, { host }) => {
-          const lastChildren = Array.from(e.children || []).slice(-2)
-          await Promise.all(
-            lastChildren.map(async (c) => {
-              if (c.innerHTML?.includes(host)) {
-                c.remove()
-              }
-            })
-          )
-        },
-        { host: new URL(url).host }
-      )
-
-      return { pwrt, page }
-    } catch (error) {
+      return { pwrt, page, error: null }
+    } catch (error: any) {
       return { error }
     }
   }
