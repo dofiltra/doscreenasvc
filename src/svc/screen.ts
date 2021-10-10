@@ -1,4 +1,4 @@
-import { BrowserManager, devices, Page, chromium } from 'browser-manager'
+import { BrowserManager, devices, Page, chromium, ElementHandle } from 'browser-manager'
 
 type TScreenOpts = {
   url: string
@@ -100,41 +100,23 @@ export class ScreenSvc {
   }
 
   private async getScreen(url: string, page: Page) {
-    if (!page) {
-      return { error: 'nopage' }
-    }
-
     try {
-      const el = await this.getEl(url, page)
+      const el = await this.getScreenEl(url, page)
       if (el) {
         return { result: await el?.screenshot({ type: 'png', omitBackground: true }) }
       }
 
-      return { result: await page.screenshot({ type: 'png', omitBackground: true, fullPage: true }) }
+      return { result: await page?.screenshot({ type: 'png', omitBackground: true, fullPage: true }) }
     } catch (error) {
       return { error }
     }
   }
 
-  private async getEl(url: string, page: Page) {
-    if (url.includes('t.me')) {
-      return await page?.$('.tgme_widget_message_bubble')
-    }
-
+  protected async getScreenEl(url: string, page: Page): Promise<ElementHandle<SVGElement | HTMLElement> | null> {
     return null
   }
 
-  private fixUrl(url: string) {
-    try {
-      const u = new URL(url)
-
-      if (url.includes('t.me')) {
-        u.searchParams.append('embed', '1')
-      }
-
-      return u.href
-    } catch {
-      return null
-    }
+  protected fixUrl(url: string) {
+    return url
   }
 }

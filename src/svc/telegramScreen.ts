@@ -1,3 +1,4 @@
+import { Page } from 'browser-manager'
 import { ScreenSvc, TScreenSettings } from '..'
 
 export class TelegramScreen extends ScreenSvc {
@@ -80,5 +81,24 @@ export class TelegramScreen extends ScreenSvc {
     }
 
     return { page, pwrt, error }
+  }
+
+  protected async getScreenEl(url: string, page: Page) {
+    if (url?.includes('t.me')) {
+      return await page?.$('.tgme_widget_message_bubble')
+    }
+
+    return super.getScreenEl(url, page)
+  }
+
+
+  protected fixUrl(url: string) {
+    try {
+      const u = new URL(url)
+      u.searchParams.append('embed', '1')
+      return u.href
+    } catch {
+      return super.fixUrl(url)
+    }
   }
 }

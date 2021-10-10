@@ -1,7 +1,7 @@
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import { ScreenSvc } from '.'
+import { ScreenSvc, TelegramScreen } from '.'
 
 type TAppSettings = {}
 
@@ -15,7 +15,7 @@ class App {
   }
 
   async start() {
-    const { result: screen, error } = await new ScreenSvc({
+    const { result: screen, error } = await new TelegramScreen({
       headless: false,
       maxOpenedBrowsers: 1,
       rootPath: App.rootPath
