@@ -70,7 +70,7 @@ export class ScreenSvc {
       })
       const page = await pwrt?.newPage({})
       await this.applyBlackList(page!)
-      await page?.goto(url, { waitUntil: 'domcontentloaded' })
+      await page?.goto(url, { waitUntil: 'networkidle' })
 
       await Promise.all(
         Object.keys(selectorInnerHtml).map(async (selector) => {
