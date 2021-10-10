@@ -27,7 +27,7 @@ export class TelegramScreen extends ScreenSvc {
             const fwdText = e.querySelector('.tgme_widget_message_forwarded_from_name')?.innerText
 
             const dateEl = e.querySelector('.tgme_widget_message_date time')
-            const date = dateEl?.attributes && dateEl.attributes['datetime']?.value
+            const date = dateEl.attributes?.datetime?.value
 
             return {
               postId,
