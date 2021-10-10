@@ -20,8 +20,6 @@ class App {
       maxOpenedBrowsers: 1,
       rootPath: App.rootPath
     }).fromUrl({ url: 'https://t.me/turkeymuslim/2907' })
-
-    debugger
   }
 }
 
