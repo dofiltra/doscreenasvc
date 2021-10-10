@@ -1,4 +1,5 @@
 import { Page } from 'browser-manager'
+import { sleep } from 'time-helpers'
 import { ScreenSvc, TScreenSettings } from '..'
 
 export class TelegramScreen extends ScreenSvc {
@@ -107,6 +108,8 @@ export class TelegramScreen extends ScreenSvc {
     if (!elNotSupport) {
       return
     }
+
+    await sleep(5e3)
 
     // TODO
   }

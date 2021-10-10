@@ -1,5 +1,6 @@
 import dotenv from 'dotenv'
 import path from 'path'
+import { webkit } from 'playwright'
 import { fileURLToPath } from 'url'
 import { ScreenSvc, TelegramScreen } from '.'
 
@@ -18,8 +19,12 @@ class App {
     const { result: screen, error } = await new TelegramScreen({
       headless: false,
       maxOpenedBrowsers: 1,
-      rootPath: App.rootPath
+      rootPath: App.rootPath,
+      blackListUrls: ['/telegram-widget.js'],
+      browserType: webkit
     }).get({ url: 'https://t.me/turkeymuslim/2907' })
+
+    
   }
 }
 
