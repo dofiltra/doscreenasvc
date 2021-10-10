@@ -37,7 +37,7 @@ export class TelegramScreen extends ScreenSvc {
               const date = dateEl.attributes?.datetime?.value
 
               const u = new URL(chanUrl)
-              const postUrl = `${u.origin}${u.pathname}/${postId}`
+              const postUrl = `${u.origin}${u.pathname.replace('/s/', '')}/${postId}`
 
               return {
                 url: postUrl,
