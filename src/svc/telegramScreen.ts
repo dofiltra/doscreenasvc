@@ -32,8 +32,11 @@ export class TelegramScreen extends ScreenSvc {
               const dateEl = e.querySelector('.tgme_widget_message_date time')
               const date = dateEl.attributes?.datetime?.value
 
+              const u = new URL(chanUrl)
+              const postUrl = `${u.origin}${u.pathname}/${postId}`
+
               return {
-                url: `${chanUrl}/${postId}`,
+                url: postUrl,
                 postId,
                 userPhoto,
                 ownerName,
