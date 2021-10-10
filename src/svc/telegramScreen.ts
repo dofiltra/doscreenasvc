@@ -87,7 +87,11 @@ export class TelegramScreen extends ScreenSvc {
       )
 
       await this.replaceNotSupport(page)
-      await this.removeEls(page!, ['.tgme_widget_message_forwarded_from', '.message_media_not_supported_wrap'])
+      await this.removeEls(page!, [
+        '.tgme_widget_message_forwarded_from',
+        '.message_media_not_supported_wrap',
+        '.tgme_header'
+      ])
     }
 
     return { page, pwrt, error }
