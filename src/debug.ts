@@ -16,13 +16,15 @@ class App {
   }
 
   async start() {
-    const { result: screen, error } = await new TelegramScreen({
+    const tgOpts = {
       headless: false,
       maxOpenedBrowsers: 1,
       rootPath: App.rootPath,
       blackListUrls: ['/telegram-widget.js'],
       browserType: chromium
-    }).get({ url: 'https://t.me/turkeymuslim/2907' })
+    }
+    const posts = await new TelegramScreen(tgOpts).getChannelPosts('https://t.me/turkeymuslim')
+    const { result: screen, error } = await new TelegramScreen(tgOpts).get({ url: 'https://t.me/turkeymuslim/2907' })
   }
 }
 

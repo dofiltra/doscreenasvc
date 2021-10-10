@@ -7,7 +7,7 @@ export class TelegramScreen extends ScreenSvc {
   }
 
   async getChannelPosts(url: string) {
-    const channelUrl = this.fixUrl(url, ['/s/'])
+    const channelUrl = this.fixUrl(url, ['/s'])
     const { pwrt, page } = await this.getPwrt(channelUrl)
     const els = (await page?.$$('.tgme_widget_message')) || []
     const posts = (
@@ -18,34 +18,37 @@ export class TelegramScreen extends ScreenSvc {
             return null
           }
 
-          return await el?.evaluate((e: any) => {
-            const [, postId] = (e.attributes['data-post']?.value || '').split('/')
-            const userPhoto = e.querySelector('.tgme_widget_message_user_photo img')?.src
-            const ownerName = e.querySelector('.tgme_widget_message_owner_name')?.innerText
-            const postBody = e.querySelector('.tgme_widget_message_text')?.innerHTML
-            const views = e.querySelector('.tgme_widget_message_views')?.innerText
-            const author = e.querySelector('.tgme_widget_message_from_author')?.innerText
-            const fwdHref = e.querySelector('.tgme_widget_message_forwarded_from_name')?.href
-            const fwdText = e.querySelector('.tgme_widget_message_forwarded_from_name')?.innerText
+          return await el?.evaluate(
+            (e: any, { channelUrl }) => {
+              const [, postId] = (e.attributes['data-post']?.value || '').split('/')
+              const userPhoto = e.querySelector('.tgme_widget_message_user_photo img')?.src
+              const ownerName = e.querySelector('.tgme_widget_message_owner_name')?.innerText
+              const postBody = e.querySelector('.tgme_widget_message_text')?.innerHTML
+              const views = e.querySelector('.tgme_widget_message_views')?.innerText
+              const author = e.querySelector('.tgme_widget_message_from_author')?.innerText
+              const fwdHref = e.querySelector('.tgme_widget_message_forwarded_from_name')?.href
+              const fwdText = e.querySelector('.tgme_widget_message_forwarded_from_name')?.innerText
 
-            const dateEl = e.querySelector('.tgme_widget_message_date time')
-            const date = dateEl.attributes?.datetime?.value
+              const dateEl = e.querySelector('.tgme_widget_message_date time')
+              const date = dateEl.attributes?.datetime?.value
 
-            return {
-              url: `${channelUrl}/${postId}`,
-              postId,
-              userPhoto,
-              ownerName,
-              postBody,
-              views,
-              author,
-              date,
-              fwd: {
-                href: fwdHref,
-                name: fwdText
+              return {
+                url: `${channelUrl}/${postId}`,
+                postId,
+                userPhoto,
+                ownerName,
+                postBody,
+                views,
+                author,
+                date,
+                fwd: {
+                  href: fwdHref,
+                  name: fwdText
+                }
               }
-            }
-          })
+            },
+            { channelUrl }
+          )
         })
       )
     )
