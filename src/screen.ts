@@ -48,6 +48,11 @@ export class ScreenSvc {
         await elMeta.evaluate((e) => (e.innerHTML = e.innerHTML.replaceAll('edited', '').replaceAll(',', '')))
       }
 
+      const notSupportedEl = await page?.$('.message_media_not_supported_wrap')
+      if (notSupportedEl) {
+        await notSupportedEl.evaluate((e) => e.remove())
+      }
+
       const { result } = await this.getScreen(url, page!)
       await pwrt?.close()
 

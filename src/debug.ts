@@ -1,6 +1,7 @@
 import dotenv from 'dotenv'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { ScreenSvc } from '.'
 
 type TAppSettings = {}
 
@@ -14,7 +15,13 @@ class App {
   }
 
   async start() {
-    //
+    const { result: screen, error } = await new ScreenSvc({
+      headless: false,
+      maxOpenedBrowsers: 1,
+      rootPath: App.rootPath
+    }).fromUrl({ url: 'https://t.me/turkeymuslim/2907' })
+
+    debugger
   }
 }
 
