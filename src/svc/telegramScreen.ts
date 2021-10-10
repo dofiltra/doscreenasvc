@@ -1,5 +1,4 @@
 import { Page } from 'browser-manager'
-import { sleep } from 'time-helpers'
 import { ScreenSvc, TScreenSettings } from '..'
 
 export class TelegramScreen extends ScreenSvc {
@@ -7,7 +6,8 @@ export class TelegramScreen extends ScreenSvc {
     super(s)
   }
 
-  async getChannelPosts(channelUrl: string) {
+  async getChannelPosts(url: string) {
+    const channelUrl = this.fixUrl(url, ['/s/'])
     const { pwrt, page } = await this.getPwrt(channelUrl)
     const els = (await page?.$$('.tgme_widget_message')) || []
     const posts = (
@@ -32,6 +32,7 @@ export class TelegramScreen extends ScreenSvc {
             const date = dateEl.attributes?.datetime?.value
 
             return {
+              url: `${channelUrl}/${postId}`,
               postId,
               userPhoto,
               ownerName,
@@ -93,9 +94,14 @@ export class TelegramScreen extends ScreenSvc {
     return super.getScreenEl(url, page)
   }
 
-  protected fixUrl(url: string) {
+  protected fixUrl(url: string, extendPathname?: string[]) {
     try {
-      const u = new URL(url)
+      let u = new URL(url)
+
+      ;(extendPathname || []).forEach((key) => {
+        u = new URL(`${u.origin}${key}${u.pathname}${u.search}`)
+      })
+
       u.searchParams.append('embed', '1')
       return u.href
     } catch {
